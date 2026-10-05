@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ title }} · Apex Gear Store</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+  <nav>
+    <div class="shell nav-inner">
+      <a class="brand" href="{{ url_for('home') }}" aria-label="Apex Gear home">
+        <span class="brand-accent" aria-hidden="true"></span>
+        <span class="brand-lockup">
+          <span class="brand-name">APEX</span>
+          <span class="brand-type">GEAR</span>
+          <span class="brand-caption">PERFORMANCE HARDWARE</span>
+        </span>
+      </a>
+
+      <div class="nav-actions">
+        <div class="security-summary">
+          <span class="security-meta">Security profile</span>
+          <span class="security-state">
+            <span class="state-mark {{ 'safe' if defence_active else 'vulnerable' }}" aria-hidden="true"></span>
+            {{ 'Layered defence' if defence_active else 'Vulnerable baseline' }}
+          </span>
+        </div>
+        <form class="defence-form" action="{{ url_for('toggle_defence') }}" method="post">
+          <button class="defence-toggle {{ 'active' if defence_active else 'baseline' }}" type="submit" aria-label="{{ 'Disable' if defence_active else 'Enable' }} layered defence">
+            <span class="toggle-track" aria-hidden="true"><span class="toggle-knob"></span></span>
+            <span>{{ 'On' if defence_active else 'Off' }}</span>
+          </button>
+        </form>
+        <button class="account-button" type="button" onclick="document.getElementById('loginModal').showModal()">
+          Sign in <span aria-hidden="true">↗</span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="shell">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}
+        <div class="alert {{ category }}">{{ message }}</div>
+      {% endfor %}
+    {% endwith %}
+
+    {% if alert %}
+      <div class="alert {{ alert.kind }}">{{ alert.message }}</div>
+    {% endif %}
+
+    {% block content %}{% endblock %}
+
+    <details class="debug" {{ 'open' if debug_open else '' }}>
+      <summary>Security demonstration console</summary>
+      <div class="debug-body">
+        <div class="debug-row">
+          <span>Current defence mode</span>
+          <code>{{ '[DEFENDED (AST + PARAMETERIZED + HONEYPOT)]' if defence_active else '[VULNERABLE (BASELINE)]' }}</code>
+        </div>
+        <div class="debug-row">
+          <span>Last executed SQL</span>
+          <code>{{ debug.sql or 'No request query executed on this view.' }}</code>
+        </div>
+        <div class="debug-row">
+          <span>AST parser verdict</span>
+          <code>{{ debug.ast }}</code>
+        </div>
+        <div class="debug-row">
+          <span>Honeypot status</span>
+          <code>{{ debug.honeypot }}</code>
+        </div>
+      </div>
+    </details>
+  </main>
+
+  <dialog id="loginModal">
+    <div class="dialog-body">
+      <div class="dialog-top">
+        <div><span class="eyebrow">Member access</span><h2>Sign in</h2></div>
+        <button class="close" type="button" onclick="this.closest('dialog').close()" aria-label="Close">×</button>
+      </div>
+      <form class="login-grid" action="{{ url_for('login') }}" method="post">
+        <div><label for="modal-user">Username</label><input id="modal-user" name="username" autocomplete="username" required></div>
+        <div><label for="modal-pass">Password</label><input id="modal-pass" name="password" type="password" autocomplete="current-password" required></div>
+        <input type="hidden" name="admin_debug_token" value="">
+        <button class="button primary" type="submit">Sign in</button>
+      </form>
+    </div>
+  </dialog>
+
+  <footer class="shell">Apex Gear Store · Isolated educational SQL injection demonstration</footer>
+</body>
+</html>

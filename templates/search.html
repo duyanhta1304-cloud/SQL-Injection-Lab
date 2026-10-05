@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <section class="panel wide-panel">
+    <div class="inline split-heading">
+      <div><span class="eyebrow">Product search</span><h2>Results for “{{ query_text }}”</h2></div>
+      <a class="button" href="{{ url_for('home') }}">Back to store</a>
+    </div>
+
+    <form class="search-form" action="{{ url_for('search') }}" method="get">
+      <input aria-label="Search products" name="q" value="{{ query_text }}" placeholder="Search products">
+      <select aria-label="Sort results" name="sort">
+        {% for item in ['name', 'price', 'category'] %}
+          <option value="{{ item }}" {{ 'selected' if sort == item else '' }}>Sort by {{ item }}</option>
+        {% endfor %}
+      </select>
+      <input type="hidden" name="admin_debug_token" value="">
+      <button class="button primary" type="submit">Search</button>
+    </form>
+
+    {% if results %}
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>ID</th><th>Name</th><th>Category</th><th>Price / value</th><th>Description / value</th></tr></thead>
+          <tbody>
+            {% for row in results %}
+              <tr><td>{{ row['id'] }}</td><td>{{ row['name'] }}</td><td>{{ row['category'] }}</td><td>{{ row['price'] }}</td><td>{{ row['description'] }}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p>No matching records were returned.</p>
+    {% endif %}
+  </section>
+{% endblock %}

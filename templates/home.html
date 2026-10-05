@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <section class="hero">
+    <div class="hero-copy">
+      <div class="eyebrow">Built for speed. Tuned for you.</div>
+      <h1>Upgrade your edge.</h1>
+      <p>High-performance peripherals and components selected for serious desks, clean builds, and competitive play.</p>
+    </div>
+    <aside class="status-card">
+      <div>
+        <span class="eyebrow">Security lab status</span>
+        <strong>{{ 'Multi-layer defence active' if defence_active else 'Baseline is intentionally exposed' }}</strong>
+        <p>{{ 'Inputs are inspected and bound as data before SQLite executes them.' if defence_active else 'Raw input is concatenated into SQL for controlled classroom demonstration.' }}</p>
+      </div>
+      <div class="mini-list">
+        <span>Prepared statements <b>{{ 'ON' if defence_active else 'OFF' }}</b></span>
+        <span>AST inspection <b>{{ 'ON' if defence_active else 'OFF' }}</b></span>
+        <span>Canary monitoring <b>{{ 'ON' if defence_active else 'PASSIVE' }}</b></span>
+      </div>
+    </aside>
+  </section>
+
+  <form class="search-form" action="{{ url_for('search') }}" method="get">
+    <input aria-label="Search products" name="q" placeholder="Search keyboards, monitors, NVMe SSDs…" value="{{ query_text }}">
+    <select aria-label="Sort results" name="sort">
+      {% for item in ['name', 'price', 'category'] %}
+        <option value="{{ item }}" {{ 'selected' if sort == item else '' }}>Sort by {{ item }}</option>
+      {% endfor %}
+    </select>
+    <input type="hidden" name="admin_debug_token" value="">
+    <button class="button primary" type="submit">Search gear</button>
+  </form>
+
+  <div class="products">
+    {% for product in products %}
+      <article class="product">
+        <div class="product-visual">
+          <img src="{{ url_for('static', filename=product_images[product['name']]) }}" alt="{{ product['name'] }}" loading="lazy">
+        </div>
+        <h3>{{ product['name'] }}</h3>
+        <p>{{ product['description'] }}</p>
+        <div class="product-meta">
+          <span class="price">${{ '%.2f'|format(product['price']) }}</span>
+          <span class="stock">{{ product['stock'] }} in stock</span>
+        </div>
+      </article>
+    {% endfor %}
+  </div>
+{% endblock %}

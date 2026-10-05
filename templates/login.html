@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <section class="panel">
+    <span class="eyebrow">Member access</span>
+    <h2>Sign in to Apex Gear</h2>
+    <p>Use the live defence switch to compare raw SQL concatenation with layered input inspection and parameter binding.</p>
+    <form class="login-grid" action="{{ url_for('login') }}" method="post">
+      <div><label for="page-user">Username</label><input id="page-user" name="username" autocomplete="username" value="{{ username }}" required></div>
+      <div><label for="page-pass">Password</label><input id="page-pass" name="password" type="password" autocomplete="current-password" required></div>
+      <input type="hidden" name="admin_debug_token" value="">
+      <button class="button primary" type="submit">Sign in</button>
+    </form>
+  </section>
+{% endblock %}
