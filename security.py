@@ -83,9 +83,18 @@ class ASTSecurityGuard:
 
 def execute_secure(cursor, base_query: str, params: tuple[Any, ...]) -> dict[str, Any]:
     """Inspect all string parameters, then execute a parameterized SQL statement."""
-    combined = " ".join(str(param) for param in params if isinstance(param, str))
-    inspection = ASTSecurityGuard.inspect_input(combined)
-    if inspection["is_malicious"]:
-        raise SecurityViolation(inspection)
+    inspections = [
+        ASTSecurityGuard.inspect_input(value)
+        for value in dict.fromkeys(param for param in params if isinstance(param, str))
+    ]
+    for inspection in inspections:
+        if inspection["is_malicious"]:
+            raise SecurityViolation(inspection)
     cursor.execute(base_query, params)
-    return inspection
+    return {
+        "is_malicious": False,
+        "detected_tokens": list(dict.fromkeys(
+            token for inspection in inspections for token in inspection["detected_tokens"]
+        )),
+        "risk_score": max((inspection["risk_score"] for inspection in inspections), default=0),
+    }

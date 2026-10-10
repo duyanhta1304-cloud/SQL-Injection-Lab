@@ -1,18 +1,25 @@
 """SQLite database engine and repeatable demo data for Apex Gear Store."""
 
+from contextlib import contextmanager
 from pathlib import Path
 import sqlite3
+from typing import Iterator
 
 
 DB_PATH = Path(__file__).with_name("apex_store.db")
 
 
-def get_db_connection() -> sqlite3.Connection:
-    """Return a configured connection to the local Apex Gear Store database."""
+@contextmanager
+def get_db_connection() -> Iterator[sqlite3.Connection]:
+    """Provide a configured connection and close it after the request."""
     connection = sqlite3.connect(DB_PATH)
     connection.row_factory = sqlite3.Row
     connection.execute("PRAGMA foreign_keys = ON")
-    return connection
+    try:
+        with connection:
+            yield connection
+    finally:
+        connection.close()
 
 
 def init_db() -> None:
@@ -43,12 +50,6 @@ def init_db() -> None:
                 stock INTEGER NOT NULL CHECK (stock >= 0)
             );
 
-            CREATE TABLE sys_canary_credentials (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                decoy_user TEXT NOT NULL,
-                decoy_token TEXT NOT NULL,
-                trap_flag TEXT NOT NULL
-            );
             """
         )
 
@@ -81,16 +82,6 @@ def init_db() -> None:
             ],
         )
 
-        cursor.executemany(
-            """
-            INSERT INTO sys_canary_credentials (decoy_user, decoy_token, trap_flag)
-            VALUES (?, ?, ?)
-            """,
-            [
-                ("svc_backup_admin", "APX-DECOY-91F4C2", "CANARY_DO_NOT_USE"),
-                ("legacy_root", "APX-DECOY-77A0BD", "CANARY_DO_NOT_USE"),
-            ],
-        )
         connection.commit()
 
 

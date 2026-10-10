@@ -14,7 +14,7 @@
           <option value="{{ item }}" {{ 'selected' if sort == item else '' }}>Sort by {{ item }}</option>
         {% endfor %}
       </select>
-      <input type="hidden" name="admin_debug_token" value="">
+      {% if honeypot_template %}{% include honeypot_template %}{% endif %}
       <button class="button primary" type="submit">Search</button>
     </form>
 
